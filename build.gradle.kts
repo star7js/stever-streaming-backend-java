@@ -1,0 +1,10 @@
+plugins {
+
+}
+
+allprojects {
+	repositories {
+		mavenCentral()
+	}
+}
+
