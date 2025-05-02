@@ -5,14 +5,23 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
+import java.io.*;
 import java.time.Instant;
 import java.util.*;
 
 import org.json.JSONObject;
 
 public class StockTradeProducer {
+    private static final List<String> tickers;
 
-    private static final List<String> SYMBOLS = List.of("AAPL", "GOOG", "MSFT", "TSL", "AMZ");
+    static {
+        try {
+            tickers = getTickersList();
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private static final Random random = new Random();
 
     public static void main(String[] args) {
@@ -20,7 +29,7 @@ public class StockTradeProducer {
 
         Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        props.put("linger.ms", 1);
+        props.put(ProducerConfig.LINGER_MS_CONFIG, 1);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
 
@@ -37,7 +46,7 @@ public class StockTradeProducer {
                 try {
                     JSONObject tradeJSON = generateFakeTrade();
 
-                    ProducerRecord<String, String> record = new ProducerRecord<>(topic, tradeJSON.getString("symbol"), tradeJSON.toString());
+                    ProducerRecord<String, String> record = new ProducerRecord<>(topic, tradeJSON.getString("ticker"), tradeJSON.toString());
                     producer.send(record, ((metadata, exception) -> {
                         if (exception != null) {
                             System.err.println("Failed to send: " + exception.getMessage());
@@ -58,19 +67,33 @@ public class StockTradeProducer {
         }
     }
 
+    private static List<String> getTickersList() throws FileNotFoundException {
+        InputStream is = StockTradeProducer.class
+                .getClassLoader()
+                .getResourceAsStream("tickers.txt");
+
+        if (is == null) {
+            throw new FileNotFoundException("ticker file not found in resources folder");
+        }
+
+        return new BufferedReader(new InputStreamReader(is))
+                .lines()
+                .filter(line -> !line.isBlank())
+                .toList();
+    }
+
     private static JSONObject generateFakeTrade() {
-        String symbol = SYMBOLS.get(random.nextInt(SYMBOLS.size()));
+        String ticker = tickers.get(random.nextInt(tickers.size()));
         double price = 100 + (random.nextDouble() * 100);
         int volume = 1 + random.nextInt(1000);
         long timestamp = Instant.now().toEpochMilli();
 
         JSONObject json = new JSONObject();
-        json.put("symbol", symbol);
+        json.put("ticker", ticker);
         json.put("price", price);
         json.put("volume", volume);
         json.put("timestamp", timestamp);
 
         return json;
-
     }
 }
