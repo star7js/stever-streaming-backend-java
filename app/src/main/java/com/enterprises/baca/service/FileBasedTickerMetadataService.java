@@ -16,7 +16,6 @@ public class FileBasedTickerMetadataService implements TickerMetadataService {
 
     @PostConstruct
     public void loadTickerData() {
-        System.out.println("Executing .loadTickerData()....");
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(
                         Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("tickers.json"))
