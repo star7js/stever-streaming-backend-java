@@ -1,5 +1,6 @@
 package com.enterprises.baca.producer;
 
+import java.security.SecureRandom;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -22,7 +23,7 @@ public class StockTradeProducer {
         }
     }
 
-    private static final Random random = new Random();
+    private static final Random random = new SecureRandom();
 
     public static void main(String[] args) {
         String topic = "trades";
