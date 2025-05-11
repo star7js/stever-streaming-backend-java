@@ -50,8 +50,6 @@ public class StockTradeProducer {
                     producer.send(record, ((metadata, exception) -> {
                         if (exception != null) {
                             System.err.println("Failed to send: " + exception.getMessage());
-                        } else {
-                            System.out.println("Sent to " + metadata.topic() + " at offest " + metadata.offset());
                         }
                     }));
 

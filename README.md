@@ -8,3 +8,5 @@ At the moment, you will just see the `producer-simulator` print to the console t
 so you know that Kafka is streaming, and the Spring app will print out the trades that it is reading from the stream.
 
 Use `./scripts/dev-stop.sh` to shut down everything gracefully.
+
+If you just want to start the `producer-simulator` then just run `./gradlew :producer-simulator:run`

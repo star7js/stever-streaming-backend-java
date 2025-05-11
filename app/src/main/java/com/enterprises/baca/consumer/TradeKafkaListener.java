@@ -1,11 +1,17 @@
 package com.enterprises.baca.consumer;
 
 import com.enterprises.baca.model.Trade;
+import com.enterprises.baca.service.TradeProcessorService;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class TradeKafkaListener {
+
+    private final TradeProcessorService tradeProcessor;
 
     @KafkaListener(
             topics = "trades",
@@ -13,8 +19,6 @@ public class TradeKafkaListener {
             containerFactory = "kafkaListenerContainerFactory"
     )
     public void listen(Trade trade) {
-        System.out.printf("Consumed Trade: %s - $%.2f (%d shares)%n",
-                trade.ticker(), trade.price(), trade.volume(), trade.timestamp()
-        );
+        tradeProcessor.process(trade);
     }
 }
